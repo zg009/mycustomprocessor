@@ -14,3 +14,4 @@ plugins {
 rootProject.name = "MyCustomProcessor"
 include(":MyAnnotationProcessor")
 include(":main")
+include(":mycustomannotation")
