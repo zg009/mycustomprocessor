@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets
 class MyAnnotationProcessor(private val codeGenerator: CodeGenerator, private  val logger: KSPLogger): SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
         resolver
-            .getSymbolsWithAnnotation(MyAnnotation::class.qualifiedName.toString())
+            .getSymbolsWithAnnotation("org.aesirlab.MyAnnotation")
             .filterIsInstance<KSClassDeclaration>()
             // Keeping this logging to make it possible to observe incremental build
             .also { logger.warn("Generating for ${it.joinToString { it.simpleName.getShortName() }}") }
@@ -30,7 +30,7 @@ class MyAnnotationProcessor(private val codeGenerator: CodeGenerator, private  v
         val fileSpec = FileSpec.builder(ClassName(packageName, "HelloFile"))
             .addFunction(helloFun)
             .build()
-        val dependencies = Dependencies(aggregating = false, annotatedClass.containingFile!!)
+        val dependencies = Dependencies(aggregating = true, annotatedClass.containingFile!!)
         val storeFile = codeGenerator.createNewFile(dependencies, packageName,
             "AnnotatedHello"
         )
