@@ -7,4 +7,3 @@ val version: String by project
 repositories {
     mavenCentral()
 }
-
