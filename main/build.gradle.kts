@@ -4,6 +4,18 @@ plugins {
     application
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21)) // Replace with desired Java version
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21) // Should match Java version
+    }
+}
+
 group = "org.aesirlab"
 val version: String by project
 
