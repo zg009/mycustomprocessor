@@ -16,14 +16,13 @@ apply {
     plugin("maven-publish")
 }
 
-group = "org.zg009"
-version = "0.1.0"
+val group: String by project
+val version: String by project
+
 
 configure<PublishingExtension> {
     repositories {
         maven {
-
-            version = version
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/zg009/mycustomprocessor")
             credentials {
@@ -34,9 +33,14 @@ configure<PublishingExtension> {
     }
     publications {
         register<MavenPublication>("gpr") {
-            groupId= group.toString()
-            artifactId="solid-annotations-lib"
+            groupId = group.toString()
+            artifactId = "aesir-test-processor"
             artifact("MyAnnotationProcessor/build/libs/MyAnnotationProcessor-$version.jar")
+        }
+        register<MavenPublication>("gpr-processor") {
+            groupId = group.toString()
+            artifactId="aesir-test-annotation"
+            artifact("mycustomannotation/build/libs/mycustomannotation-$version.jar")
         }
     }
 }

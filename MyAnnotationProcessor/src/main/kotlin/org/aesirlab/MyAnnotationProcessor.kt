@@ -1,4 +1,4 @@
-package org.aesirlab.annotations
+package org.aesirlab
 
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated

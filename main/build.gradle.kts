@@ -1,24 +1,17 @@
 plugins {
     kotlin("jvm")
     id("com.google.devtools.ksp")
+    application
 }
 
 group = "org.aesirlab"
-version = "0.1.5"
-
-repositories {
-    mavenCentral()
-}
+val version: String by project
 
 dependencies {
-    implementation(kotlin("stdlib"))
-    implementation(project(":MyAnnotationProcessor"))
+    implementation(project(":mycustomannotation"))
     ksp(project(":MyAnnotationProcessor"))
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-kotlin {
-    jvmToolchain(19)
+repositories {
+    mavenCentral()
 }

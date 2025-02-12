@@ -1,6 +1,6 @@
 package org.aesirlab
 
-import org.aesirlab.annotations.MyAnnotation
+import org.aesirlab.MyAnnotation
 
 @MyAnnotation
 class DummyClass {
