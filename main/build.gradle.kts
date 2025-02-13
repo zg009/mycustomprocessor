@@ -1,24 +1,29 @@
 plugins {
     kotlin("jvm")
     id("com.google.devtools.ksp")
+    application
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21)) // Replace with desired Java version
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21) // Should match Java version
+    }
 }
 
 group = "org.aesirlab"
-version = "0.1.5"
-
-repositories {
-    mavenCentral()
-}
+val version: String by project
 
 dependencies {
-    implementation(kotlin("stdlib"))
-    implementation(project(":MyAnnotationProcessor"))
+    implementation(project(":mycustomannotation"))
     ksp(project(":MyAnnotationProcessor"))
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-kotlin {
-    jvmToolchain(19)
+repositories {
+    mavenCentral()
 }

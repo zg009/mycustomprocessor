@@ -1,21 +1,17 @@
 plugins {
     kotlin("jvm")
 }
-
-group = "org.aesirlab"
-version = "0.1.1"
+val version: String by project
+val kspVersion: String by project
+dependencies {
+    implementation(project(":mycustomannotation"))
+    implementation("com.squareup:kotlinpoet:1.14.0")
+    implementation("com.squareup:kotlinpoet-ksp:1.12.0")
+    implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
+}
 
 repositories {
     mavenCentral()
+    google()
 }
 
-dependencies {
-    implementation(kotlin("stdlib"))
-    implementation("com.squareup:kotlinpoet:1.14.0")
-    implementation("com.squareup:kotlinpoet-ksp:1.12.0")
-    implementation("com.google.devtools.ksp:symbol-processing-api:2.0.0-1.0.21")
-}
-
-sourceSets.main {
-    java.srcDirs("src/main/kotlin")
-}

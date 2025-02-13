@@ -16,17 +16,15 @@ apply {
     plugin("maven-publish")
 }
 
-group = "org.zg009"
-version = "0.1.1"
-val projectName = "mycustomprocessor"
-val domain = "zg009/$projectName"
+val group: String by project
+val version: String by project
+
 
 configure<PublishingExtension> {
     repositories {
         maven {
-            version = version
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/$domain")
+            url = uri("https://maven.pkg.github.com/zg009/mycustomprocessor")
             credentials {
                 username = "zg009"
                 password = project.findProperty("gpr.key") as String? ?: System.getProperty("TOKEN")
@@ -35,9 +33,14 @@ configure<PublishingExtension> {
     }
     publications {
         register<MavenPublication>("gpr") {
-            groupId= group.toString()
-            artifactId="test-annotation-processor"
+            groupId = group.toString()
+            artifactId = "aesir-test-processor"
             artifact("MyAnnotationProcessor/build/libs/MyAnnotationProcessor-$version.jar")
+        }
+        register<MavenPublication>("gpr-processor") {
+            groupId = group.toString()
+            artifactId="aesir-test-annotation"
+            artifact("mycustomannotation/build/libs/mycustomannotation-$version.jar")
         }
     }
 }
