@@ -1,6 +1,6 @@
 
+
 fun main() {
-    val d = DummyClass()
+    val d = DummyClass("one", "DummyClass")
     println("Hi!")
-    hello()
 }

@@ -5,6 +5,7 @@ import com.google.devtools.ksp.getAnnotationsByType
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
 import java.io.OutputStreamWriter
@@ -14,7 +15,7 @@ import java.util.*
 class MyAnnotationProcessor(private val codeGenerator: CodeGenerator, private  val logger: KSPLogger): SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
         resolver
-            .getSymbolsWithAnnotation("org.aesirlab.MyAnnotation")
+            .getSymbolsWithAnnotation("org.aesirlab.SolidAnnotation")
             .filterIsInstance<KSClassDeclaration>()
             // Keeping this logging to make it possible to observe incremental build
             .also { logger.warn("Generating for ${ it.joinToString { seq -> seq.simpleName.getShortName() }}") }
@@ -27,488 +28,488 @@ class MyAnnotationProcessor(private val codeGenerator: CodeGenerator, private  v
         annotatedClass: KSClassDeclaration
     ) {
         buildDaoFile(annotatedClass)
-//        buildUtilitiesFile(annotatedClass)
+        buildUtilitiesFile(annotatedClass)
         buildDaoImplFile(annotatedClass)
         buildRepositoryFile(annotatedClass)
         buildDatabaseFile(annotatedClass)
-//        buildContextScript(annotatedClass)
-//        buildSolidUtilitiesFile(annotatedClass)
+        buildContextScript(annotatedClass)
+        buildSolidUtilitiesFile(annotatedClass)
     }
 
-//    private fun buildContextScript(
-//        annotatedClass: KSClassDeclaration
-//    ) {
-//        val packageName = annotatedClass.packageName.getQualifier()
-//
-//        val contextClass = ClassName("android.content", "Context")
-//        val dataStoreClass = ClassName("androidx.datastore.core", "DataStore")
-//        val preferencesClass = ClassName("androidx.datastore.preferences.core", "Preferences")
-//        val preferencesDataStoreMember = MemberName("androidx.datastore.preferences", "preferencesDataStore")
-//
-//        val scriptFileSpec = FileSpec
-//            .scriptBuilder("Script", packageName)
-//            .addStatement("val %T.dataStore: %T<%T> by %M(\"userData\")",
-//                contextClass, dataStoreClass, preferencesClass, preferencesDataStoreMember)
-//            .build()
-//        val dependencies = Dependencies(aggregating = false, annotatedClass.containingFile!!)
-//        val scriptFile = codeGenerator.createNewFile(dependencies, scriptFileSpec.packageName, scriptFileSpec.name)
-//        OutputStreamWriter(scriptFile, StandardCharsets.UTF_8)
-//            .use(scriptFileSpec::writeTo)
-//    }
+    private fun buildContextScript(
+        annotatedClass: KSClassDeclaration
+    ) {
+        val packageName = annotatedClass.packageName.getQualifier()
 
-//    @OptIn(KspExperimental::class)
-//    private fun buildSolidUtilitiesFile(
-//        annotatedClass: KSClassDeclaration
-//    ) {
-//        val packageName = annotatedClass.packageName.getQualifier()
-//
-//        val className = annotatedClass
-//            .getAnnotationsByType(SolidAnnotation::class)
-//            .single()
-//            .name
-//        val baseClassName = ClassName(annotatedClass.packageName.asString(), annotatedClass.simpleName.getShortName())
-//
-//        val contextType = ClassName("android.content", "Context")
-//        val contextParam = ParameterSpec
-//            .builder("context", contextType)
-//            .build()
-//
-//        // TODO: figure out the best way to get the base package name
-//        val tokenStoreType = ClassName(packageName, "AuthTokenStore")
-////        val tokenStoreType = ClassName("com.zybooks.testannotationsprocessor.ui.store", "AuthTokenStore")
-//
-//        val tokenStoreProp = PropertySpec
-//            .builder("tokenStore", tokenStoreType)
-//            .initializer("%T(context)", tokenStoreType)
-//            .addModifiers(KModifier.PRIVATE)
-//            .build()
-//
-//        val requestBody = ClassName("okhttp3", "RequestBody")
-//        val request = ClassName("okhttp3", "Request")
-//        val solidUtilities = ClassName(packageName, "Utilities")
-//        val absoluteUriRef = MemberName(packageName.plus(".Utilities.Companion"), "ABSOLUTE_URI")
-//        val queryExecutionFactory = ClassName("com.hp.hpl.jena.query","QueryExecutionFactory")
-//        val queryFactory = ClassName("com.hp.hpl.jena.query", "QueryFactory")
-//        val model = ClassName("com.hp.hpl.jena.rdf.model", "Model")
-//        val modelFactory = ClassName("com.hp.hpl.jena.rdf.model", "ModelFactory")
-//        val joseObjectType = ClassName("com.nimbusds.jose","JOSEObjectType")
-//        val jwsAlgo = ClassName("com.nimbusds.jose","JWSAlgorithm")
-//        val jwsHeader = ClassName("com.nimbusds.jose","JWSHeader")
-//        val ecdsaSigner = ClassName("com.nimbusds.jose.crypto","ECDSASigner")
-//        val ecKey = ClassName("com.nimbusds.jose.jwk","ECKey")
-//        val jwk = ClassName("com.nimbusds.jose.jwk","JWK")
-//        val jwtClaimsSet = ClassName("com.nimbusds.jwt","JWTClaimsSet")
-//        val signedJwt = ClassName("com.nimbusds.jwt","SignedJWT")
-//        val first = MemberName("kotlinx.coroutines.flow","first")
-//        val runBlocking = MemberName("kotlinx.coroutines","runBlocking")
-//        val formBody = ClassName("okhttp3","FormBody")
-//        val okHttpClient = ClassName("okhttp3","OkHttpClient")
-//        val toRequestBody = MemberName("okhttp3.RequestBody.Companion","toRequestBody")
-//        val jsonObject = ClassName("org.json","JSONObject")
-//        val byteArrayOutputStream = ClassName("java.io","ByteArrayOutputStream")
-//        val calendar = ClassName("java.util","Calendar")
-//        val uuid = ClassName("java.util","UUID")
-//
-//        val regenerateRefreshTokenFun = FunSpec
-//            .builder("regenerateRefreshToken")
-//            .addModifiers(KModifier.SUSPEND)
-//            .addStatement("val tokenUri = %M { tokenStore.getTokenUri().%M() }", runBlocking, first)
-//            .addStatement("val refreshToken = %M { tokenStore.getRefreshToken().%M() }", runBlocking, first)
-//            .addStatement("val clientId = %M { tokenStore.getClientId().%M() }", runBlocking, first)
-//            .addStatement("val accessToken = %M { tokenStore.getAccessToken().%M() }", runBlocking, first)
-//            .addStatement("val clientSecret = %M { tokenStore.getClientSecret().%M() }", runBlocking, first)
-//            .addCode("""
-//                val formBody = %T.Builder()
-//                .addEncoded("grant_type", "refresh_token")
-//                .addEncoded("refresh_token", refreshToken)
-//                .addEncoded("client_id", clientId)
-//                .addEncoded("client_secret", clientSecret)
-//                .addEncoded("scope", "openid+offline_access+webid")
-//                .build()
-//
-//            """.trimIndent(), formBody)
-//            .addStatement("val request = %T.Builder().url(tokenUri).addHeader(\"DPoP\", generateCustomToken(\"POST\", tokenUri))" +
-//                    ".addHeader(\"Authorization\", \"DPoP \$accessToken\")" +
-//                    ".addHeader(\"Content-Type\", \"application/x-www-form-urlencoded\").method(\"POST\", formBody)" +
-//                    ".build()", request)
-//            .addStatement("val client = %T()", okHttpClient)
-//            .addStatement("val response = client.newCall(request).execute()")
-//            .addStatement("val body = response.body!!.string()")
-//            .beginControlFlow("if (response.code in 400..499)")
-//            .addStatement("throw Error(\"could not refresh token sad\")")
-//            .nextControlFlow("else")
-//            .addStatement("val jsonResponse = %T(body)", jsonObject)
-//            .addStatement("val newAccessToken = jsonResponse.getString(\"access_token\")")
-//            .addStatement("val newIdToken = jsonResponse.getString(\"id_token\")")
-//            .addStatement("val newRefreshToken = jsonResponse.getString(\"refresh_token\")")
-//            .addStatement("tokenStore.setIdToken(newIdToken)")
-//            .addStatement("tokenStore.setRefreshToken(newRefreshToken)")
-//            .addStatement("tokenStore.setAccessToken(newAccessToken)")
-//            .endControlFlow()
-//            .build()
-//
-//
-//        val generatePutRequestFun = FunSpec
-//            .builder("generatePutRequest")
-//            .addModifiers(KModifier.PRIVATE)
-//            .addParameter("resourceUri", String::class)
-//            .addParameter("rBody", requestBody)
-//            .addStatement("val accessToken = %M { tokenStore.getAccessToken().%M() }", runBlocking, first)
-//            .addStatement("return %T.Builder().url(resourceUri).addHeader(\"DPoP\", generateCustomToken(\"PUT\", resourceUri))" +
-//                    ".addHeader(\"Authorization\", \"DPoP \$accessToken\").addHeader(\"content-type\", \"text/turtle\")" +
-//                    ".addHeader(\"Link\", \"<http://www.w3.org/ns/ldp#Resource>;rel=\\\"type\\\"\").method(\"PUT\", rBody)" +
-//                    ".build()", request)
-//            .returns(request)
-//            .build()
-//
-//        val generateGetRequestFun = FunSpec
-//            .builder("generateGetRequest")
-//            .addModifiers(KModifier.PRIVATE)
-//            .addParameter("resourceUri", String::class)
-//            .addParameter("accessToken", String::class)
-//            .addStatement("return %T.Builder().url(resourceUri).addHeader(\"DPoP\", generateCustomToken(\"GET\", resourceUri))" +
-//                    ".addHeader(\"Authorization\", \"DPoP \$accessToken\")" +
-//                    ".addHeader(\"Content-Type\", \"text/turtle\")" +
-//                    ".addHeader(\"Link\", \"<http://www.w3.org/ns/ldp#Resource>;rel=\\\"type\\\"\").method(\"GET\", null)" +
-//                    ".build()", request)
-//            .returns(request)
-//            .build()
-//
-//        val checkStorageFun = FunSpec
-//            .builder("checkStorage")
-//            .addModifiers(KModifier.SUSPEND)
-//            .addParameter("storageUri", String::class)
-//            .addParameter("accessToken", String::class)
-//            .addStatement("val client = %T()", okHttpClient)
-//            .addStatement("val request = generateGetRequest(\"\$storageUri\$%M\", accessToken)", absoluteUriRef)
-//            .addStatement("val response = client.newCall(request).execute()")
-//            .beginControlFlow("if (response.code in 400..499)")
-//            .addStatement("return \"\"")
-//            .endControlFlow()
-//            .addStatement("val body = response.body!!.string()")
-//            .addStatement("return body")
-//            .returns(String::class)
-//            .build()
-//
-//        val generateCustomTokenFun = FunSpec
-//            .builder("generateCustomToken")
-//            .addModifiers(KModifier.PRIVATE)
-//            .addParameter("method", String::class)
-//            .addParameter("uri", String::class)
-//            .addStatement("val signingJwk = %M { tokenStore.getSigner().%M() }", runBlocking, first)
-//            .beginControlFlow("if (signingJwk == \"\")")
-//            .addStatement("throw Error(\"no signing jwk found\")")
-//            .endControlFlow()
-//            .addStatement("val parsedKey = %T.parse(%T.parse(signingJwk).toJSONObject())", ecKey, jwk)
-//            .addStatement("val ecPublicJWK = parsedKey.toPublicJWK()")
-//            .addStatement("val signer = %T(parsedKey)", ecdsaSigner)
-//            .addStatement("val body = %T.Builder().claim(\"htu\", uri).claim(\"htm\", method)" +
-//                    ".issueTime(%T.getInstance().time).jwtID(%T.randomUUID().toString()).build()",
-//                jwtClaimsSet, calendar, uuid)
-//            .addStatement("val header = %T.Builder(%T.ES256).type(%T(\"dpop+jwt\")).jwk(ecPublicJWK)" +
-//                    ".build()", jwsHeader, jwsAlgo, joseObjectType)
-//            .addStatement("val signedJWT = %T(header, body)", signedJwt)
-//            .addStatement("signedJWT.sign(signer)")
-//            .addStatement("return signedJWT.serialize()")
-//            .returns(String::class)
-//            .build()
-//
-//        val updateSolidDatasetFunBuilder = FunSpec
-//            .builder("updateSolidDataset")
-//            .addModifiers(KModifier.SUSPEND)
-//            .addParameter("items", List::class.asTypeName().plusParameter(baseClassName))
-//            .addStatement("val accessToken = %M { tokenStore.getAccessToken().%M() }", runBlocking, first)
-//            .addStatement("val storageUri = %M { val webId = tokenStore.getWebId().%M(); getStorage(webId) }", runBlocking, first)
-//            .beginControlFlow("if (storageUri != \"\" && accessToken != \"\")")
-//            .addStatement("val client = %T.Builder().build()", okHttpClient)
-//            .addStatement("val resourceUri = \"\${storageUri}\${%M}\"", absoluteUriRef)
-//            .addStatement("val model = %T.createDefaultModel()", modelFactory)
-//            .addStatement("model.setNsPrefix(\"acp\", %T.NS_ACP)", solidUtilities)
-//            .addStatement("model.setNsPrefix(\"acl\", %T.NS_ACL)", solidUtilities)
-//            .addStatement("model.setNsPrefix(\"ldp\", %T.NS_LDP)", solidUtilities)
-//            .addStatement("model.setNsPrefix(\"skos\", %T.NS_SKOS)", solidUtilities)
-//            .addStatement("model.setNsPrefix(\"ci\", %T.NS_$className)", solidUtilities)
-//
-//        val filteredProps = annotatedClass
-//            .getAllProperties()
-//            .filter { it.simpleName.getShortName() != "id" }
-//
-//        val varsList = mutableListOf<Pair<KSPropertyDeclaration, String>>()
-//        filteredProps.forEach {
-//            varsList.add(Pair(it, "ci${it.simpleName.getShortName().replaceFirstChar { char -> char.uppercase() }}"))
-//            updateSolidDatasetFunBuilder.addStatement("val ci${it.simpleName.getShortName().replaceFirstChar { char -> char.uppercase() }} =" +
-//                    " model.createProperty(Utilities.NS_$className + \"${it.simpleName.getShortName()}\")")
-//        }
-//
-//        updateSolidDatasetFunBuilder.addStatement("items.forEach { ci -> ")
-//        updateSolidDatasetFunBuilder.addStatement("val id = ci.id")
-//        updateSolidDatasetFunBuilder.addStatement("val mThingUri = model.createResource(\"\$resourceUri#\$id\")")
-//        varsList.forEach { variable ->
-//
-//            when (variable.first.type.resolve().toString()) {
-//
-//                "String" -> {
-//                    updateSolidDatasetFunBuilder.addStatement("mThingUri.addLiteral(${variable.second}, ci.${variable.first.simpleName.getShortName()})")
-//                }
-//
-//                "Date" -> {
-//                    updateSolidDatasetFunBuilder.addStatement("mThingUri.addLiteral(${variable.second}, ci.${variable.first.simpleName.getShortName()})")
-//                }
-//
-//                "Float" -> {
-//                    updateSolidDatasetFunBuilder.addStatement("mThingUri.addLiteral(${variable.second}, ci.${variable.first.simpleName.getShortName()})")
-//                }
-//
-//                "Int" -> {
-//                    updateSolidDatasetFunBuilder.addStatement("mThingUri.addLiteral(${variable.second}, ci.${variable.first.simpleName.getShortName()})")
-//                }
-//
-//                "Boolean" -> {
-//                    updateSolidDatasetFunBuilder.addStatement("mThingUri.addLiteral(${variable.second}, ci.${variable.first.simpleName.getShortName()})")
-//                }
-//
-//                "Long" -> {
-//                    updateSolidDatasetFunBuilder.addStatement("mThingUri.addLiteral(${variable.second}, ci.${variable.first.simpleName.getShortName()})")
-//                }
-//            }
-//        }
-//
-//        updateSolidDatasetFunBuilder.addStatement("}")
-//
-//        val updateSolidDatasetFun = updateSolidDatasetFunBuilder
-//            .addStatement("val bOutputStream = %T()", byteArrayOutputStream)
-//            .addStatement("model.write(bOutputStream, \"TURTLE\", null)")
-//            .addStatement("val rBody = bOutputStream.toByteArray().%M(null, 0, bOutputStream.size())", toRequestBody)
-//            .addStatement("val putRequest = generatePutRequest(resourceUri, rBody)")
-//            .addStatement("val putResponse = client.newCall(putRequest).execute()")
-////            .addStatement("putResponse.body?.let { }")
-//            .addStatement("return putResponse.code")
-//            .nextControlFlow("else")
-//            .addStatement("return 600")
-//            .endControlFlow()
-//            .returns(Int::class)
-//            .build()
-//
-//        val getStorageFun = FunSpec
-//            .builder("getStorage")
-//            .addModifiers(KModifier.SUSPEND)
-//            .addParameter("webId", String::class)
-//            .addStatement("val client = %T()", okHttpClient)
-//            .addStatement("val webIdRequest = %T.Builder().url(webId).build()", request)
-//            .addStatement("val webIdResponse = client.newCall(webIdRequest).execute()")
-//            .addStatement("val responseString = webIdResponse.body!!.string()")
-//            .addStatement("val byteArray = responseString.toByteArray()")
-//            .addStatement("val inStream = String(byteArray).byteInputStream()")
-//            .addStatement("val m = %T.createDefaultModel().read(inStream, null, \"TURTLE\")", modelFactory)
-//            .addStatement("val queryString = \"SELECT ?o\\n\" +\n" +
-//                    "            \"WHERE\\n\" +\n" +
-//                    "            \"{ ?s <http://www.w3.org/ns/pim/space#storage> ?o }\"")
-//            .addStatement("val q = %T.create(queryString)", queryFactory)
-//            .addStatement("var storage = \"\"")
-//            .addStatement("try {")
-//            .addStatement("val qexec = %T.create(q, m)", queryExecutionFactory)
-//            .addStatement("val results = qexec.execSelect()")
-//            .addStatement("while (results.hasNext()) {")
-//            .addStatement("val soln = results.nextSolution()")
-//            .addStatement("storage = soln.getResource(\"o\").toString()")
-//            .addStatement("break")
-//            .addStatement("}")
-//            .addStatement("} catch (e: Exception) {")
-//            .addStatement("}")
-//            .addStatement("return storage")
-//            .returns(String::class)
-//            .build()
-//
-//        val constructor = FunSpec.constructorBuilder()
-//            .addParameter(contextParam)
-//            .build()
-//
-//        val classBuilder = TypeSpec
-//            .classBuilder("SolidUtilities")
-//            .primaryConstructor(constructor)
-//            .addProperty(tokenStoreProp)
-//            .addFunctions(
-//                listOf(
-//                    updateSolidDatasetFun,
-//                    generateGetRequestFun,
-//                    generateCustomTokenFun,
-//                    generatePutRequestFun,
-//                    regenerateRefreshTokenFun,
-//                    checkStorageFun
-//                )
-//            )
-//
-//        val solidUtilsFileSpec = FileSpec
-//            .builder(packageName, "SolidUtilities")
-//            .addType(
-//                classBuilder.build()
-//            )
-//            .addFunction(getStorageFun)
-//            .build()
-//        val dependencies = Dependencies(aggregating = false, annotatedClass.containingFile!!)
-//        val utilsFile = codeGenerator.createNewFile(dependencies, solidUtilsFileSpec.packageName, solidUtilsFileSpec.name)
-//        OutputStreamWriter(utilsFile, StandardCharsets.UTF_8)
-//            .use(solidUtilsFileSpec::writeTo)
-//    }
+        val contextClass = ClassName("android.content", "Context")
+        val dataStoreClass = ClassName("androidx.datastore.core", "DataStore")
+        val preferencesClass = ClassName("androidx.datastore.preferences.core", "Preferences")
+        val preferencesDataStoreMember = MemberName("androidx.datastore.preferences", "preferencesDataStore")
 
-//    @OptIn(KspExperimental::class)
-//    private fun buildUtilitiesFile(
-//        annotatedClass: KSClassDeclaration
-//    ) {
-//        val className = annotatedClass
-//            .getAnnotationsByType(SolidAnnotation::class)
-//            .single()
-//            .name
-//        val packageName = annotatedClass.packageName.getQualifier()
-//        val uriShortName = annotatedClass
-//            .getAnnotationsByType(SolidAnnotation::class)
-//            .single()
-//            .uriShortName
-//        val absoluteUri = annotatedClass
-//            .getAnnotationsByType(SolidAnnotation::class)
-//            .single()
-//            .absoluteUri
-//
-//        val modelFactoryClass = ClassName("com.hp.hpl.jena.rdf.model", "ModelFactory")
-//        val resourceFactoryClass = ClassName("com.hp.hpl.jena.rdf.model", "ResourceFactory")
-//
-//        val resourceConverterFnSpec = FunSpec
-//            .builder("resourceTo$className")
-//            .addParameter(
-//                ParameterSpec
-//                    .builder("resource", ClassName("com.hp.hpl.jena.rdf.model", "Resource"))
-//                    .build()
-//            )
-//            .addStatement("val anonModel = %T.createDefaultModel()", modelFactoryClass)
-//            .addStatement("val id = resource.uri.split(\"#\")[1]")
-//
-//        val filteredProps = annotatedClass
-//            .getAllProperties()
-//            .filter { it.simpleName.getShortName() != "id" }
-//
-//        filteredProps.forEach {
-//            resourceConverterFnSpec
-//                .addStatement("val ${it.simpleName.getShortName()}Prop = anonModel.createProperty(NS_$className + \"${it.simpleName.getShortName()}\")")
-//            resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()}Object = resource.getProperty(${it.simpleName.getShortName()}Prop).`object`")
-//            resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()}Literal = %T.createTypedLiteral(${it.simpleName.getShortName()}Object)", resourceFactoryClass)
-//
-//            when (it.type.resolve().toString()) {
-//
-//                "String" -> {
-//                    val stmt = "val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.value as ${it.type.resolve()}"
-//                    resourceConverterFnSpec.addStatement(stmt)
-////                    resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.string")
-//                }
-//
-//                "Date" -> {
-//                    val stmt = "val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.value as ${it.type.resolve()}"
-//                    resourceConverterFnSpec.addStatement(stmt)
-////                    resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal")
-//                }
-//
-//                "Float" -> {
-//                    val stmt = "val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.value as ${it.type.resolve()}"
-//                    resourceConverterFnSpec.addStatement(stmt)
-////                    resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.float")
-//                }
-//
-//                "Int" -> {
-//                    val stmt = "val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.value as ${it.type.resolve()}"
-//                    resourceConverterFnSpec.addStatement(stmt)
-////                    resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.int")
-//                }
-//
-//                "Boolean" -> {
-//                    val stmt = "val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.value as ${it.type.resolve()}"
-//                    resourceConverterFnSpec.addStatement(stmt)
-////                    resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.boolean")
-//                }
-//
-//                "Long" -> {
-//                    val stmt = "val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.value as ${it.type.resolve()}"
-//                    resourceConverterFnSpec.addStatement(stmt)
-////                    resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.long")
-//                }
-//            }
-//        }
-//        val propsString = filteredProps.joinToString {
-//            it.simpleName.getShortName()
-//        }
-//
-//        val classAnnotation = ClassName(annotatedClass
-//            .qualifiedName
-//            ?.getQualifier()
-//            .orEmpty(), className)
-//        resourceConverterFnSpec.addStatement(
-//            "return %T(id, $propsString)",
-//            classAnnotation
-//        )
-//
-//        val resourceConverterFn = resourceConverterFnSpec
-//            .returns(classAnnotation)
-//            .build()
-//
-//        val absoluteUriSpec = PropertySpec
-//            .builder("ABSOLUTE_URI", String::class, KModifier.CONST)
-//            .initializer("\"$absoluteUri\"")
-//            .build()
-//        val nsAcpSpec = PropertySpec
-//            .builder("NS_ACP", String::class, KModifier.CONST)
-//            .initializer("\"http://www.w3.org/ns/solid/acp#\"")
-//            .build()
-//        val nsAclSpec = PropertySpec
-//            .builder("NS_ACL", String::class, KModifier.CONST)
-//            .initializer("\"http://www.w3.org/ns/auth/acl#\"")
-//            .build()
-//        val nsLdpSpec = PropertySpec
-//            .builder("NS_LDP", String::class, KModifier.CONST)
-//            .initializer("\"http://www.w3.org/ns/ldp#\"")
-//            .build()
-//        val nsSkosSpec = PropertySpec
-//            .builder("NS_SKOS", String::class, KModifier.CONST)
-//            .initializer("\"http://www.w3.org/2004/02/skos/core#\"")
-//            .build()
-//        val nsSolidSpec = PropertySpec
-//            .builder("NS_SOLID", String::class, KModifier.CONST)
-//            .initializer("\"http://www.w3.org/ns/solid/terms#\"")
-//            .build()
-//        val nsClassTagSpec = PropertySpec
-//            .builder("NS_${className}", String::class, KModifier.CONST)
-//            .initializer("\"$uriShortName\"")
-//            .build()
-//
-//        val companionObject = TypeSpec
-//            .companionObjectBuilder()
-//            .addProperties(
-//                listOf(
-//                    absoluteUriSpec,
-//                    nsAcpSpec,
-//                    nsAclSpec,
-//                    nsLdpSpec,
-//                    nsSkosSpec,
-//                    nsSolidSpec,
-//                    nsClassTagSpec
-//                )
-//            )
-//            .addFunction(
-//                resourceConverterFn
-//            )
-//            .build()
-//
-//        val utilsFileSpec = FileSpec
-//            .builder(packageName, "Utilities")
-//            .addType(
-//                TypeSpec
-//                    .classBuilder("Utilities")
-//                    .addType(companionObject)
-//                    .build()
-//            )
-//            .build()
-//        val dependencies = Dependencies(aggregating = false, annotatedClass.containingFile!!)
-//        val utilsFile = codeGenerator.createNewFile(dependencies, utilsFileSpec.packageName, utilsFileSpec.name)
-//        OutputStreamWriter(utilsFile, StandardCharsets.UTF_8)
-//            .use(utilsFileSpec::writeTo)
-//    }
+        val scriptFileSpec = FileSpec
+            .scriptBuilder("Script", packageName)
+            .addStatement("val %T.dataStore: %T<%T> by %M(\"userData\")",
+                contextClass, dataStoreClass, preferencesClass, preferencesDataStoreMember)
+            .build()
+        val dependencies = Dependencies(aggregating = false, annotatedClass.containingFile!!)
+        val scriptFile = codeGenerator.createNewFile(dependencies, scriptFileSpec.packageName, scriptFileSpec.name)
+        OutputStreamWriter(scriptFile, StandardCharsets.UTF_8)
+            .use(scriptFileSpec::writeTo)
+    }
+
+    @OptIn(KspExperimental::class)
+    private fun buildSolidUtilitiesFile(
+        annotatedClass: KSClassDeclaration
+    ) {
+        val packageName = annotatedClass.packageName.getQualifier()
+
+        val className = annotatedClass
+            .getAnnotationsByType(SolidAnnotation::class)
+            .single()
+            .name
+        val baseClassName = ClassName(annotatedClass.packageName.asString(), annotatedClass.simpleName.getShortName())
+
+        val contextType = ClassName("android.content", "Context")
+        val contextParam = ParameterSpec
+            .builder("context", contextType)
+            .build()
+
+        // TODO: figure out the best way to get the base package name
+        val tokenStoreType = ClassName(packageName, "AuthTokenStore")
+//        val tokenStoreType = ClassName("com.zybooks.testannotationsprocessor.ui.store", "AuthTokenStore")
+
+        val tokenStoreProp = PropertySpec
+            .builder("tokenStore", tokenStoreType)
+            .initializer("%T(context)", tokenStoreType)
+            .addModifiers(KModifier.PRIVATE)
+            .build()
+
+        val requestBody = ClassName("okhttp3", "RequestBody")
+        val request = ClassName("okhttp3", "Request")
+        val solidUtilities = ClassName(packageName, "Utilities")
+        val absoluteUriRef = MemberName(packageName.plus(".Utilities.Companion"), "ABSOLUTE_URI")
+        val queryExecutionFactory = ClassName("com.hp.hpl.jena.query","QueryExecutionFactory")
+        val queryFactory = ClassName("com.hp.hpl.jena.query", "QueryFactory")
+        val model = ClassName("com.hp.hpl.jena.rdf.model", "Model")
+        val modelFactory = ClassName("com.hp.hpl.jena.rdf.model", "ModelFactory")
+        val joseObjectType = ClassName("com.nimbusds.jose","JOSEObjectType")
+        val jwsAlgo = ClassName("com.nimbusds.jose","JWSAlgorithm")
+        val jwsHeader = ClassName("com.nimbusds.jose","JWSHeader")
+        val ecdsaSigner = ClassName("com.nimbusds.jose.crypto","ECDSASigner")
+        val ecKey = ClassName("com.nimbusds.jose.jwk","ECKey")
+        val jwk = ClassName("com.nimbusds.jose.jwk","JWK")
+        val jwtClaimsSet = ClassName("com.nimbusds.jwt","JWTClaimsSet")
+        val signedJwt = ClassName("com.nimbusds.jwt","SignedJWT")
+        val first = MemberName("kotlinx.coroutines.flow","first")
+        val runBlocking = MemberName("kotlinx.coroutines","runBlocking")
+        val formBody = ClassName("okhttp3","FormBody")
+        val okHttpClient = ClassName("okhttp3","OkHttpClient")
+        val toRequestBody = MemberName("okhttp3.RequestBody.Companion","toRequestBody")
+        val jsonObject = ClassName("org.json","JSONObject")
+        val byteArrayOutputStream = ClassName("java.io","ByteArrayOutputStream")
+        val calendar = ClassName("java.util","Calendar")
+        val uuid = ClassName("java.util","UUID")
+
+        val regenerateRefreshTokenFun = FunSpec
+            .builder("regenerateRefreshToken")
+            .addModifiers(KModifier.SUSPEND)
+            .addStatement("val tokenUri = %M { tokenStore.getTokenUri().%M() }", runBlocking, first)
+            .addStatement("val refreshToken = %M { tokenStore.getRefreshToken().%M() }", runBlocking, first)
+            .addStatement("val clientId = %M { tokenStore.getClientId().%M() }", runBlocking, first)
+            .addStatement("val accessToken = %M { tokenStore.getAccessToken().%M() }", runBlocking, first)
+            .addStatement("val clientSecret = %M { tokenStore.getClientSecret().%M() }", runBlocking, first)
+            .addCode("""
+                val formBody = %T.Builder()
+                .addEncoded("grant_type", "refresh_token")
+                .addEncoded("refresh_token", refreshToken)
+                .addEncoded("client_id", clientId)
+                .addEncoded("client_secret", clientSecret)
+                .addEncoded("scope", "openid+offline_access+webid")
+                .build()
+
+            """.trimIndent(), formBody)
+            .addStatement("val request = %T.Builder().url(tokenUri).addHeader(\"DPoP\", generateCustomToken(\"POST\", tokenUri))" +
+                    ".addHeader(\"Authorization\", \"DPoP \$accessToken\")" +
+                    ".addHeader(\"Content-Type\", \"application/x-www-form-urlencoded\").method(\"POST\", formBody)" +
+                    ".build()", request)
+            .addStatement("val client = %T()", okHttpClient)
+            .addStatement("val response = client.newCall(request).execute()")
+            .addStatement("val body = response.body!!.string()")
+            .beginControlFlow("if (response.code in 400..499)")
+            .addStatement("throw Error(\"could not refresh token sad\")")
+            .nextControlFlow("else")
+            .addStatement("val jsonResponse = %T(body)", jsonObject)
+            .addStatement("val newAccessToken = jsonResponse.getString(\"access_token\")")
+            .addStatement("val newIdToken = jsonResponse.getString(\"id_token\")")
+            .addStatement("val newRefreshToken = jsonResponse.getString(\"refresh_token\")")
+            .addStatement("tokenStore.setIdToken(newIdToken)")
+            .addStatement("tokenStore.setRefreshToken(newRefreshToken)")
+            .addStatement("tokenStore.setAccessToken(newAccessToken)")
+            .endControlFlow()
+            .build()
+
+
+        val generatePutRequestFun = FunSpec
+            .builder("generatePutRequest")
+            .addModifiers(KModifier.PRIVATE)
+            .addParameter("resourceUri", String::class)
+            .addParameter("rBody", requestBody)
+            .addStatement("val accessToken = %M { tokenStore.getAccessToken().%M() }", runBlocking, first)
+            .addStatement("return %T.Builder().url(resourceUri).addHeader(\"DPoP\", generateCustomToken(\"PUT\", resourceUri))" +
+                    ".addHeader(\"Authorization\", \"DPoP \$accessToken\").addHeader(\"content-type\", \"text/turtle\")" +
+                    ".addHeader(\"Link\", \"<http://www.w3.org/ns/ldp#Resource>;rel=\\\"type\\\"\").method(\"PUT\", rBody)" +
+                    ".build()", request)
+            .returns(request)
+            .build()
+
+        val generateGetRequestFun = FunSpec
+            .builder("generateGetRequest")
+            .addModifiers(KModifier.PRIVATE)
+            .addParameter("resourceUri", String::class)
+            .addParameter("accessToken", String::class)
+            .addStatement("return %T.Builder().url(resourceUri).addHeader(\"DPoP\", generateCustomToken(\"GET\", resourceUri))" +
+                    ".addHeader(\"Authorization\", \"DPoP \$accessToken\")" +
+                    ".addHeader(\"Content-Type\", \"text/turtle\")" +
+                    ".addHeader(\"Link\", \"<http://www.w3.org/ns/ldp#Resource>;rel=\\\"type\\\"\").method(\"GET\", null)" +
+                    ".build()", request)
+            .returns(request)
+            .build()
+
+        val checkStorageFun = FunSpec
+            .builder("checkStorage")
+            .addModifiers(KModifier.SUSPEND)
+            .addParameter("storageUri", String::class)
+            .addParameter("accessToken", String::class)
+            .addStatement("val client = %T()", okHttpClient)
+            .addStatement("val request = generateGetRequest(\"\$storageUri\$%M\", accessToken)", absoluteUriRef)
+            .addStatement("val response = client.newCall(request).execute()")
+            .beginControlFlow("if (response.code in 400..499)")
+            .addStatement("return \"\"")
+            .endControlFlow()
+            .addStatement("val body = response.body!!.string()")
+            .addStatement("return body")
+            .returns(String::class)
+            .build()
+
+        val generateCustomTokenFun = FunSpec
+            .builder("generateCustomToken")
+            .addModifiers(KModifier.PRIVATE)
+            .addParameter("method", String::class)
+            .addParameter("uri", String::class)
+            .addStatement("val signingJwk = %M { tokenStore.getSigner().%M() }", runBlocking, first)
+            .beginControlFlow("if (signingJwk == \"\")")
+            .addStatement("throw Error(\"no signing jwk found\")")
+            .endControlFlow()
+            .addStatement("val parsedKey = %T.parse(%T.parse(signingJwk).toJSONObject())", ecKey, jwk)
+            .addStatement("val ecPublicJWK = parsedKey.toPublicJWK()")
+            .addStatement("val signer = %T(parsedKey)", ecdsaSigner)
+            .addStatement("val body = %T.Builder().claim(\"htu\", uri).claim(\"htm\", method)" +
+                    ".issueTime(%T.getInstance().time).jwtID(%T.randomUUID().toString()).build()",
+                jwtClaimsSet, calendar, uuid)
+            .addStatement("val header = %T.Builder(%T.ES256).type(%T(\"dpop+jwt\")).jwk(ecPublicJWK)" +
+                    ".build()", jwsHeader, jwsAlgo, joseObjectType)
+            .addStatement("val signedJWT = %T(header, body)", signedJwt)
+            .addStatement("signedJWT.sign(signer)")
+            .addStatement("return signedJWT.serialize()")
+            .returns(String::class)
+            .build()
+
+        val updateSolidDatasetFunBuilder = FunSpec
+            .builder("updateSolidDataset")
+            .addModifiers(KModifier.SUSPEND)
+            .addParameter("items", List::class.asTypeName().plusParameter(baseClassName))
+            .addStatement("val accessToken = %M { tokenStore.getAccessToken().%M() }", runBlocking, first)
+            .addStatement("val storageUri = %M { val webId = tokenStore.getWebId().%M(); getStorage(webId) }", runBlocking, first)
+            .beginControlFlow("if (storageUri != \"\" && accessToken != \"\")")
+            .addStatement("val client = %T.Builder().build()", okHttpClient)
+            .addStatement("val resourceUri = \"\${storageUri}\${%M}\"", absoluteUriRef)
+            .addStatement("val model = %T.createDefaultModel()", modelFactory)
+            .addStatement("model.setNsPrefix(\"acp\", %T.NS_ACP)", solidUtilities)
+            .addStatement("model.setNsPrefix(\"acl\", %T.NS_ACL)", solidUtilities)
+            .addStatement("model.setNsPrefix(\"ldp\", %T.NS_LDP)", solidUtilities)
+            .addStatement("model.setNsPrefix(\"skos\", %T.NS_SKOS)", solidUtilities)
+            .addStatement("model.setNsPrefix(\"ci\", %T.NS_$className)", solidUtilities)
+
+        val filteredProps = annotatedClass
+            .getAllProperties()
+            .filter { it.simpleName.getShortName() != "id" }
+
+        val varsList = mutableListOf<Pair<KSPropertyDeclaration, String>>()
+        filteredProps.forEach {
+            varsList.add(Pair(it, "ci${it.simpleName.getShortName().replaceFirstChar { char -> char.uppercase() }}"))
+            updateSolidDatasetFunBuilder.addStatement("val ci${it.simpleName.getShortName().replaceFirstChar { char -> char.uppercase() }} =" +
+                    " model.createProperty(Utilities.NS_$className + \"${it.simpleName.getShortName()}\")")
+        }
+
+        updateSolidDatasetFunBuilder.addStatement("items.forEach { ci -> ")
+        updateSolidDatasetFunBuilder.addStatement("val id = ci.id")
+        updateSolidDatasetFunBuilder.addStatement("val mThingUri = model.createResource(\"\$resourceUri#\$id\")")
+        varsList.forEach { variable ->
+
+            when (variable.first.type.resolve().toString()) {
+
+                "String" -> {
+                    updateSolidDatasetFunBuilder.addStatement("mThingUri.addLiteral(${variable.second}, ci.${variable.first.simpleName.getShortName()})")
+                }
+
+                "Date" -> {
+                    updateSolidDatasetFunBuilder.addStatement("mThingUri.addLiteral(${variable.second}, ci.${variable.first.simpleName.getShortName()})")
+                }
+
+                "Float" -> {
+                    updateSolidDatasetFunBuilder.addStatement("mThingUri.addLiteral(${variable.second}, ci.${variable.first.simpleName.getShortName()})")
+                }
+
+                "Int" -> {
+                    updateSolidDatasetFunBuilder.addStatement("mThingUri.addLiteral(${variable.second}, ci.${variable.first.simpleName.getShortName()})")
+                }
+
+                "Boolean" -> {
+                    updateSolidDatasetFunBuilder.addStatement("mThingUri.addLiteral(${variable.second}, ci.${variable.first.simpleName.getShortName()})")
+                }
+
+                "Long" -> {
+                    updateSolidDatasetFunBuilder.addStatement("mThingUri.addLiteral(${variable.second}, ci.${variable.first.simpleName.getShortName()})")
+                }
+            }
+        }
+
+        updateSolidDatasetFunBuilder.addStatement("}")
+
+        val updateSolidDatasetFun = updateSolidDatasetFunBuilder
+            .addStatement("val bOutputStream = %T()", byteArrayOutputStream)
+            .addStatement("model.write(bOutputStream, \"TURTLE\", null)")
+            .addStatement("val rBody = bOutputStream.toByteArray().%M(null, 0, bOutputStream.size())", toRequestBody)
+            .addStatement("val putRequest = generatePutRequest(resourceUri, rBody)")
+            .addStatement("val putResponse = client.newCall(putRequest).execute()")
+//            .addStatement("putResponse.body?.let { }")
+            .addStatement("return putResponse.code")
+            .nextControlFlow("else")
+            .addStatement("return 600")
+            .endControlFlow()
+            .returns(Int::class)
+            .build()
+
+        val getStorageFun = FunSpec
+            .builder("getStorage")
+            .addModifiers(KModifier.SUSPEND)
+            .addParameter("webId", String::class)
+            .addStatement("val client = %T()", okHttpClient)
+            .addStatement("val webIdRequest = %T.Builder().url(webId).build()", request)
+            .addStatement("val webIdResponse = client.newCall(webIdRequest).execute()")
+            .addStatement("val responseString = webIdResponse.body!!.string()")
+            .addStatement("val byteArray = responseString.toByteArray()")
+            .addStatement("val inStream = String(byteArray).byteInputStream()")
+            .addStatement("val m = %T.createDefaultModel().read(inStream, null, \"TURTLE\")", modelFactory)
+            .addStatement("val queryString = \"SELECT ?o\\n\" +\n" +
+                    "            \"WHERE\\n\" +\n" +
+                    "            \"{ ?s <http://www.w3.org/ns/pim/space#storage> ?o }\"")
+            .addStatement("val q = %T.create(queryString)", queryFactory)
+            .addStatement("var storage = \"\"")
+            .addStatement("try {")
+            .addStatement("val qexec = %T.create(q, m)", queryExecutionFactory)
+            .addStatement("val results = qexec.execSelect()")
+            .addStatement("while (results.hasNext()) {")
+            .addStatement("val soln = results.nextSolution()")
+            .addStatement("storage = soln.getResource(\"o\").toString()")
+            .addStatement("break")
+            .addStatement("}")
+            .addStatement("} catch (e: Exception) {")
+            .addStatement("}")
+            .addStatement("return storage")
+            .returns(String::class)
+            .build()
+
+        val constructor = FunSpec.constructorBuilder()
+            .addParameter(contextParam)
+            .build()
+
+        val classBuilder = TypeSpec
+            .classBuilder("SolidUtilities")
+            .primaryConstructor(constructor)
+            .addProperty(tokenStoreProp)
+            .addFunctions(
+                listOf(
+                    updateSolidDatasetFun,
+                    generateGetRequestFun,
+                    generateCustomTokenFun,
+                    generatePutRequestFun,
+                    regenerateRefreshTokenFun,
+                    checkStorageFun
+                )
+            )
+
+        val solidUtilsFileSpec = FileSpec
+            .builder(packageName, "SolidUtilities")
+            .addType(
+                classBuilder.build()
+            )
+            .addFunction(getStorageFun)
+            .build()
+        val dependencies = Dependencies(aggregating = false, annotatedClass.containingFile!!)
+        val utilsFile = codeGenerator.createNewFile(dependencies, solidUtilsFileSpec.packageName, solidUtilsFileSpec.name)
+        OutputStreamWriter(utilsFile, StandardCharsets.UTF_8)
+            .use(solidUtilsFileSpec::writeTo)
+    }
+
+    @OptIn(KspExperimental::class)
+    private fun buildUtilitiesFile(
+        annotatedClass: KSClassDeclaration
+    ) {
+        val className = annotatedClass
+            .getAnnotationsByType(SolidAnnotation::class)
+            .single()
+            .name
+        val packageName = annotatedClass.packageName.getQualifier()
+        val uriShortName = annotatedClass
+            .getAnnotationsByType(SolidAnnotation::class)
+            .single()
+            .uriShortName
+        val absoluteUri = annotatedClass
+            .getAnnotationsByType(SolidAnnotation::class)
+            .single()
+            .absoluteUri
+
+        val modelFactoryClass = ClassName("com.hp.hpl.jena.rdf.model", "ModelFactory")
+        val resourceFactoryClass = ClassName("com.hp.hpl.jena.rdf.model", "ResourceFactory")
+
+        val resourceConverterFnSpec = FunSpec
+            .builder("resourceTo$className")
+            .addParameter(
+                ParameterSpec
+                    .builder("resource", ClassName("com.hp.hpl.jena.rdf.model", "Resource"))
+                    .build()
+            )
+            .addStatement("val anonModel = %T.createDefaultModel()", modelFactoryClass)
+            .addStatement("val id = resource.uri.split(\"#\")[1]")
+
+        val filteredProps = annotatedClass
+            .getAllProperties()
+            .filter { it.simpleName.getShortName() != "id" }
+
+        filteredProps.forEach {
+            resourceConverterFnSpec
+                .addStatement("val ${it.simpleName.getShortName()}Prop = anonModel.createProperty(NS_$className + \"${it.simpleName.getShortName()}\")")
+            resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()}Object = resource.getProperty(${it.simpleName.getShortName()}Prop).`object`")
+            resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()}Literal = %T.createTypedLiteral(${it.simpleName.getShortName()}Object)", resourceFactoryClass)
+
+            when (it.type.resolve().toString()) {
+
+                "String" -> {
+                    val stmt = "val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.value as ${it.type.resolve()}"
+                    resourceConverterFnSpec.addStatement(stmt)
+//                    resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.string")
+                }
+
+                "Date" -> {
+                    val stmt = "val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.value as ${it.type.resolve()}"
+                    resourceConverterFnSpec.addStatement(stmt)
+//                    resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal")
+                }
+
+                "Float" -> {
+                    val stmt = "val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.value as ${it.type.resolve()}"
+                    resourceConverterFnSpec.addStatement(stmt)
+//                    resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.float")
+                }
+
+                "Int" -> {
+                    val stmt = "val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.value as ${it.type.resolve()}"
+                    resourceConverterFnSpec.addStatement(stmt)
+//                    resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.int")
+                }
+
+                "Boolean" -> {
+                    val stmt = "val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.value as ${it.type.resolve()}"
+                    resourceConverterFnSpec.addStatement(stmt)
+//                    resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.boolean")
+                }
+
+                "Long" -> {
+                    val stmt = "val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.value as ${it.type.resolve()}"
+                    resourceConverterFnSpec.addStatement(stmt)
+//                    resourceConverterFnSpec.addStatement("val ${it.simpleName.getShortName()} = ${it.simpleName.getShortName()}Literal.long")
+                }
+            }
+        }
+        val propsString = filteredProps.joinToString {
+            it.simpleName.getShortName()
+        }
+
+        val classAnnotation = ClassName(annotatedClass
+            .qualifiedName
+            ?.getQualifier()
+            .orEmpty(), className)
+        resourceConverterFnSpec.addStatement(
+            "return %T(id, $propsString)",
+            classAnnotation
+        )
+
+        val resourceConverterFn = resourceConverterFnSpec
+            .returns(classAnnotation)
+            .build()
+
+        val absoluteUriSpec = PropertySpec
+            .builder("ABSOLUTE_URI", String::class, KModifier.CONST)
+            .initializer("\"$absoluteUri\"")
+            .build()
+        val nsAcpSpec = PropertySpec
+            .builder("NS_ACP", String::class, KModifier.CONST)
+            .initializer("\"http://www.w3.org/ns/solid/acp#\"")
+            .build()
+        val nsAclSpec = PropertySpec
+            .builder("NS_ACL", String::class, KModifier.CONST)
+            .initializer("\"http://www.w3.org/ns/auth/acl#\"")
+            .build()
+        val nsLdpSpec = PropertySpec
+            .builder("NS_LDP", String::class, KModifier.CONST)
+            .initializer("\"http://www.w3.org/ns/ldp#\"")
+            .build()
+        val nsSkosSpec = PropertySpec
+            .builder("NS_SKOS", String::class, KModifier.CONST)
+            .initializer("\"http://www.w3.org/2004/02/skos/core#\"")
+            .build()
+        val nsSolidSpec = PropertySpec
+            .builder("NS_SOLID", String::class, KModifier.CONST)
+            .initializer("\"http://www.w3.org/ns/solid/terms#\"")
+            .build()
+        val nsClassTagSpec = PropertySpec
+            .builder("NS_${className}", String::class, KModifier.CONST)
+            .initializer("\"$uriShortName\"")
+            .build()
+
+        val companionObject = TypeSpec
+            .companionObjectBuilder()
+            .addProperties(
+                listOf(
+                    absoluteUriSpec,
+                    nsAcpSpec,
+                    nsAclSpec,
+                    nsLdpSpec,
+                    nsSkosSpec,
+                    nsSolidSpec,
+                    nsClassTagSpec
+                )
+            )
+            .addFunction(
+                resourceConverterFn
+            )
+            .build()
+
+        val utilsFileSpec = FileSpec
+            .builder(packageName, "Utilities")
+            .addType(
+                TypeSpec
+                    .classBuilder("Utilities")
+                    .addType(companionObject)
+                    .build()
+            )
+            .build()
+        val dependencies = Dependencies(aggregating = false, annotatedClass.containingFile!!)
+        val utilsFile = codeGenerator.createNewFile(dependencies, utilsFileSpec.packageName, utilsFileSpec.name)
+        OutputStreamWriter(utilsFile, StandardCharsets.UTF_8)
+            .use(utilsFileSpec::writeTo)
+    }
 
     @OptIn(KspExperimental::class)
     private fun buildDatabaseFile(
@@ -603,7 +604,7 @@ class MyAnnotationProcessor(private val codeGenerator: CodeGenerator, private  v
             .nextControlFlow("else")
             .addStatement("synchronized(this) {")
             .addStatement("val file = %T(context.filesDir, filePath)", javaIoFileType)
-            .addStatement("val model: Model?")
+            .addStatement("var model: Model? = null")
             .beginControlFlow("if (file.exists())")
             .addStatement("val inStream = file.inputStream()")
             .addStatement("model = %T.createDefaultModel().read(inStream, null)", modelFactoryType)
@@ -615,7 +616,7 @@ class MyAnnotationProcessor(private val codeGenerator: CodeGenerator, private  v
             .addStatement("model.setNsPrefix(\"skos\", %T.NS_SKOS)", utilsObject)
             .addStatement("model.setNsPrefix(\"ti\", %T.NS_$className)", utilsObject)
             .endControlFlow()
-            .addStatement("val instance = ${className}Database(baseUri, filePath, context, model)\n")
+            .addStatement("val instance = ${className}Database(baseUri, filePath, context, model!!)\n")
             .addStatement("INSTANCE = instance")
             .addStatement("return instance")
             .addStatement("}")
