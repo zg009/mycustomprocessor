@@ -6,13 +6,13 @@ plugins {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21)) // Replace with desired Java version
+        languageVersion.set(JavaLanguageVersion.of(19)) // Replace with desired Java version
     }
 }
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21) // Should match Java version
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_19) // Should match Java version
     }
 }
 
